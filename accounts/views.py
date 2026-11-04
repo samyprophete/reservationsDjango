@@ -4,10 +4,23 @@ from django.views.generic import CreateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
 from django.contrib import messages
-from .forms import UsersSignUpForm 
+from .forms import UserSignUpForm 
+from django.shortcuts import redirect, render                              # <-- ajoute render
+from django.contrib.auth.decorators import login_required 
 
+@login_required
+def profile(request):
+    languages = {
+        "fr": "Français",
+        "en": "English",
+        "nl": "Nederlands",
+    }
+    return render(request, 'user/profile.html', {
+        "user_language": languages[request.user.usermeta.langue],
+    })
+    
 class UserSignUpView(UserPassesTestMixin, CreateView):
-    form_class = UsersSignUpForm
+    form_class = UserSignUpForm
     success_url = reverse_lazy("login")
     template_name = "registration/signup.html"
 
