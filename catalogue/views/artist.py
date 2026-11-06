@@ -5,6 +5,8 @@ from catalogue.forms import ArtistForm
 from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import user_passes_test
 
 def index(request):
     artists = Artist.objects.all()
@@ -26,7 +28,16 @@ def show(request, artist_id):
         'title': title 
     })
 
+def group_required(*group_names):
+    def in_groups(user):
+        if user.is_authenticated:
+            if user.groups.filter(name__in=group_names).exists() or user.is_superuser:
+                return True
+        return False
+    return user_passes_test(in_groups)
+
 @login_required
+@group_required('ADMIN')
 def edit(request, artist_id):
     # fetch the object related to passed id
     artist = Artist.objects.get(id=artist_id)
@@ -54,6 +65,11 @@ def edit(request, artist_id):
     })
 
 
+def admin_check(user):
+    return user.username.__eq__('bob') and user.email.__eq__("bob@sull.com")
+
+@login_required
+@group_required('ADMIN')
 def create(request):
     if not request.user.is_authenticated or not request.user.has_perm('add_artist'):
         return redirect(f"{settings.LOGIN_URL}?next={request.path}")
@@ -72,6 +88,10 @@ def create(request):
         'form': form,
     })
 
+
+@login_required
+@group_required('ADMIN')
+@permission_required('catalog.can_delete', raise_exception=True)
 def delete(request, artist_id):
     artist = get_object_or_404(Artist, id=artist_id)
     if request.method == "POST":
