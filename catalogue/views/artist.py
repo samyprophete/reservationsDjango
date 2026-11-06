@@ -4,6 +4,7 @@ from catalogue.models import Artist
 from catalogue.forms import ArtistForm
 from django.contrib import messages
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
 def index(request):
     artists = Artist.objects.all()
@@ -25,6 +26,7 @@ def show(request, artist_id):
         'title': title 
     })
 
+@login_required
 def edit(request, artist_id):
     # fetch the object related to passed id
     artist = Artist.objects.get(id=artist_id)
