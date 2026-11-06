@@ -1,7 +1,8 @@
 from django.urls import path
-from .import views 
+
+from .views import UserSignUpView, UserUpdateView
 from .views import profile, delete
-from .views import UserSignUpView , UserUpdateView
+from . import views
 
 app_name = 'accounts'
 
@@ -10,4 +11,4 @@ urlpatterns = [
     path('profile/', views.profile, name='user-profile'),
     path('profile/<int:pk>/', UserUpdateView.as_view(), name='user-update'),
     path('profile/delete/<int:pk>/', views.delete, name='user-delete'),
-    ]
+]
